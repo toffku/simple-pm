@@ -8,11 +8,11 @@ import {
   SidebarMenuItem,
 } from "./ui/sidebar";
 import {
+  Briefcase,
   Calendar,
   Home,
   Inbox,
   LucideProps,
-  Search,
   Settings,
 } from "lucide-react";
 
@@ -22,6 +22,11 @@ interface SidebarTypes {
   icon: React.ForwardRefExoticComponent<
     Omit<LucideProps, "ref"> & React.RefAttributes<SVGSVGElement>
   >;
+}
+
+interface ProjectTypes {
+  title: string;
+  url: string;
 }
 
 const items: Array<SidebarTypes> = [
@@ -41,14 +46,24 @@ const items: Array<SidebarTypes> = [
     icon: Calendar,
   },
   {
-    title: "Search",
-    url: "#",
-    icon: Search,
-  },
-  {
     title: "Settings",
     url: "#",
     icon: Settings,
+  },
+];
+
+const projects: Array<ProjectTypes> = [
+  {
+    title: "proj-01",
+    url: "#",
+  },
+  {
+    title: "proj-02",
+    url: "#",
+  },
+  {
+    title: "proj-03",
+    url: "#",
   },
 ];
 
@@ -56,9 +71,10 @@ const AppSidebar = () => {
   return (
     <>
       <Sidebar>
+        <h1 className="text-lg font-bold p-5">simple.pm</h1>
+
         {/* <SidebarContent /> */}
         <SidebarGroup>
-          <SidebarGroupLabel>Application</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               {items.map((item) => (
@@ -66,6 +82,23 @@ const AppSidebar = () => {
                   <SidebarMenuButton asChild>
                     <a href={item.url}>
                       <item.icon />
+                      <span>{item.title}</span>
+                    </a>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+        <SidebarGroup>
+          <SidebarGroupLabel>Projects</SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {projects.map((item) => (
+                <SidebarMenuItem key={item.title}>
+                  <SidebarMenuButton asChild>
+                    <a href={item.url}>
+                      <Briefcase />
                       <span>{item.title}</span>
                     </a>
                   </SidebarMenuButton>

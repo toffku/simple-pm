@@ -7,14 +7,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "./ui/sidebar";
-import {
-  Briefcase,
-  Calendar,
-  Home,
-  Inbox,
-  LucideProps,
-  Settings,
-} from "lucide-react";
+import { Briefcase, Calendar, Grid2X2, LucideProps } from "lucide-react";
 
 interface SidebarTypes {
   title: string;
@@ -31,24 +24,14 @@ interface ProjectTypes {
 
 const items: Array<SidebarTypes> = [
   {
-    title: "Home",
+    title: "Board",
     url: "#",
-    icon: Home,
-  },
-  {
-    title: "Inbox",
-    url: "#",
-    icon: Inbox,
+    icon: Grid2X2,
   },
   {
     title: "Calendar",
     url: "#",
     icon: Calendar,
-  },
-  {
-    title: "Settings",
-    url: "#",
-    icon: Settings,
   },
 ];
 

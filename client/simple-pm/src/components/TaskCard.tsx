@@ -8,7 +8,7 @@ interface TaskCardProps {
 
 const TaskCard = ({ task }: TaskCardProps) => {
   return (
-    <Card className="mb-4 p-4 cursor-pointer">
+    <Card className="mb-4 p-4 cursor-pointer transition duration-150 ease-in-out hover:bg-muted">
       <div>
         <Badge>High</Badge>
         <h1 className="font-bold pt-2">{task.title}</h1>

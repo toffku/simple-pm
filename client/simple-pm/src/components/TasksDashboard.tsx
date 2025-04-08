@@ -19,13 +19,13 @@ const tasks: TaskProps[] = [
   },
 ];
 
-const Dashboard = () => {
+const TasksDashboard = () => {
   return (
     <>
       <div>
         <h1 className="text-3xl font-bold p-8">Project title</h1>
       </div>
-      <div className="mx-8 p-4 rounded-md border-l-8 bg-card border-l-pink-700">
+      <div className="mx-8 p-4 rounded-md border border-l-8 bg-card border-l-pink-700">
         <h1 className="font-bold">To Do</h1>
       </div>
       <div className="p-8">
@@ -33,7 +33,7 @@ const Dashboard = () => {
           <TaskCard task={task} />
         ))}
       </div>
-      <div className="mx-8 p-4 rounded-md bg-card border-l-8 border-l-indigo-700">
+      <div className="mx-8 p-4 rounded-md border bg-card border-l-8 border-l-indigo-700">
         <h1 className="font-bold">In Progress</h1>
       </div>
       <div className="p-8">
@@ -41,7 +41,7 @@ const Dashboard = () => {
           <TaskCard task={task} />
         ))}
       </div>
-      <div className="mx-8 p-4 rounded-md bg-card border-l-8 border-l-green-700">
+      <div className="mx-8 p-4 rounded-md border bg-card border-l-8 border-l-green-700">
         <h1 className="font-bold">Completed</h1>
       </div>
       <div className="p-8">
@@ -53,4 +53,4 @@ const Dashboard = () => {
   );
 };
 
-export default Dashboard;
+export default TasksDashboard;

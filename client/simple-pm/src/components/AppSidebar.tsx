@@ -54,7 +54,7 @@ const AppSidebar = () => {
   return (
     <>
       <Sidebar>
-        <h1 className="text-lg font-bold p-5">simple.pm</h1>
+        <h1 className="text-lg font-bold p-5">simple֊pm</h1>
 
         {/* <SidebarContent /> */}
         <SidebarGroup>

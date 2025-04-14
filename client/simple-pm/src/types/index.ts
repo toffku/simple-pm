@@ -3,3 +3,9 @@ export type TaskProps = {
   date: string;
   description: string;
 };
+
+export type ProjectProps = {
+  title: string;
+  daysLeft: number;
+  tasks: TaskProps[];
+};

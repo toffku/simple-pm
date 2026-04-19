@@ -1,3 +1,4 @@
+import { Link } from "@tanstack/react-router";
 import {
   Sidebar,
   SidebarGroup,
@@ -19,13 +20,13 @@ interface SidebarTypes {
 
 interface ProjectTypes {
   title: string;
-  url: string;
+  projectId: string;
 }
 
 const items: Array<SidebarTypes> = [
   {
     title: "Board",
-    url: "#",
+    url: "/",
     icon: Grid2X2,
   },
   {
@@ -36,18 +37,9 @@ const items: Array<SidebarTypes> = [
 ];
 
 const projects: Array<ProjectTypes> = [
-  {
-    title: "proj-01",
-    url: "#",
-  },
-  {
-    title: "proj-02",
-    url: "#",
-  },
-  {
-    title: "proj-03",
-    url: "#",
-  },
+  { title: "proj-01", projectId: "proj-01" },
+  { title: "proj-02", projectId: "proj-02" },
+  { title: "proj-03", projectId: "proj-03" },
 ];
 
 const AppSidebar = () => {
@@ -63,10 +55,24 @@ const AppSidebar = () => {
               {items.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild>
-                    <a href={item.url}>
-                      <item.icon />
-                      <span>{item.title}</span>
-                    </a>
+                    {item.url === "#" ? (
+                      <a href="#">
+                        <item.icon />
+                        <span>{item.title}</span>
+                      </a>
+                    ) : (
+                      <Link
+                        to={item.url}
+                        activeOptions={{ exact: true }}
+                        activeProps={{
+                          className:
+                            "bg-sidebar-accent text-sidebar-accent-foreground font-medium",
+                        }}
+                      >
+                        <item.icon />
+                        <span>{item.title}</span>
+                      </Link>
+                    )}
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               ))}
@@ -80,10 +86,18 @@ const AppSidebar = () => {
               {projects.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild>
-                    <a href={item.url}>
+                    <Link
+                      to="/task/$projectId"
+                      params={{ projectId: item.projectId }}
+                      activeOptions={{ exact: true }}
+                      activeProps={{
+                        className:
+                          "bg-sidebar-accent text-sidebar-accent-foreground font-medium",
+                      }}
+                    >
                       <Briefcase />
                       <span>{item.title}</span>
-                    </a>
+                    </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               ))}

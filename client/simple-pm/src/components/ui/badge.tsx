@@ -13,6 +13,8 @@ const badgeVariants = cva(
         low: "bg-background text-neutral-300",
         normal: "bg-background text-green-500",
         high: "bg-background text-red-400",
+        outline:
+          "border border-input bg-background text-foreground px-0 rounded-md",
       },
     },
     defaultVariants: {

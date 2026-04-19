@@ -1,29 +1,53 @@
-import * as React from "react"
-import * as ProgressPrimitive from "@radix-ui/react-progress"
+import * as React from "react";
+import * as ProgressPrimitive from "@radix-ui/react-progress";
 
-import { cn } from "@/lib/utils"
+import { cn } from "@/lib/utils";
 
-function Progress({
-  className,
-  value,
-  ...props
-}: React.ComponentProps<typeof ProgressPrimitive.Root>) {
+type ProgressSegment = {
+  value: number;
+  color?: string;
+};
+
+type Props = React.ComponentPropsWithoutRef<typeof ProgressPrimitive.Root> & {
+  segments: ProgressSegment[];
+};
+
+const Progress = React.forwardRef<
+  React.ElementRef<typeof ProgressPrimitive.Root>,
+  Props
+>(({ className, segments, ...props }, ref) => {
+  // const sortedSegments = segments.sort((a, b) => a.value - b.value);
+  const sortedSegments = segments;
+
   return (
     <ProgressPrimitive.Root
-      data-slot="progress"
+      ref={ref}
       className={cn(
-        "bg-primary/20 relative h-2 w-full overflow-hidden rounded-full",
+        "relative h-2 w-full overflow-hidden rounded-full bg-gray-400/20",
         className
       )}
       {...props}
     >
-      <ProgressPrimitive.Indicator
-        data-slot="progress-indicator"
-        className="bg-primary h-full w-full flex-1 transition-all"
-        style={{ transform: `translateX(-${100 - (value || 0)}%)` }}
-      />
+      {sortedSegments.map((segment, index) => (
+        <ProgressPrimitive.Indicator
+          key={index}
+          className={cn(
+            "h-full transition-all absolute",
+            segment.color ? segment.color : "bg-primary"
+          )}
+          style={{
+            width: `${segment.value}%`,
+            left: `${sortedSegments
+              .slice(0, index)
+              .reduce((acc, segment) => acc + segment.value, 0)}%`,
+            zIndex: sortedSegments.length - index,
+          }}
+        />
+      ))}
     </ProgressPrimitive.Root>
-  )
-}
+  );
+});
 
-export { Progress }
+Progress.displayName = "Progress";
+
+export { Progress };

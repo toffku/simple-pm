@@ -6,5 +6,6 @@ export const Route = createFileRoute("/task/$projectId")({
 });
 
 function TasksPage() {
-  return <TasksDashboard />;
+  const { projectId } = Route.useParams();
+  return <TasksDashboard projectId={projectId} />;
 }

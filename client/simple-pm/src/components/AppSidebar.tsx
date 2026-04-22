@@ -9,6 +9,9 @@ import {
   SidebarMenuItem,
 } from "./ui/sidebar";
 import { Briefcase, Calendar, Grid2X2, LucideProps } from "lucide-react";
+import { useEffect, useState } from "react";
+import { fetchJson } from "@/lib/api";
+import { ApiProject } from "@/types";
 
 interface SidebarTypes {
   title: string;
@@ -36,13 +39,27 @@ const items: Array<SidebarTypes> = [
   },
 ];
 
-const projects: Array<ProjectTypes> = [
-  { title: "proj-01", projectId: "proj-01" },
-  { title: "proj-02", projectId: "proj-02" },
-  { title: "proj-03", projectId: "proj-03" },
-];
-
 const AppSidebar = () => {
+  const [projects, setProjects] = useState<Array<ProjectTypes>>([]);
+
+  useEffect(() => {
+    const loadProjects = async () => {
+      try {
+        const projectsData = await fetchJson<ApiProject[]>("/api/projects");
+        setProjects(
+          projectsData.map((project) => ({
+            title: project.name,
+            projectId: String(project.id),
+          }))
+        );
+      } catch (_error) {
+        setProjects([]);
+      }
+    };
+
+    void loadProjects();
+  }, []);
+
   return (
     <>
       <Sidebar>

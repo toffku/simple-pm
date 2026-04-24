@@ -6,12 +6,13 @@ import { fetchJson } from "@/lib/api";
 import { ApiProject } from "@/types";
 import { useEffect, useMemo, useState } from "react";
 import { Spinner } from "./ui/spinner";
+import AddProjectCard from "./AddProjectCard";
 
 const ProjectDashboard = () => {
   const [projectsData, setProjectsData] = useState<ApiProject[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-
+  const [showAddProjectModal, setShowAddProjectModal] = useState(false);
   useEffect(() => {
     const loadProjects = async () => {
       try {
@@ -64,16 +65,13 @@ const ProjectDashboard = () => {
     });
   }, [projectsData]);
 
-  if (isLoading) {
-    return <div className="p-8"><Spinner /></div>;
-  }
-
-  if (error) {
-    return <div className="p-8 text-red-500">{error}</div>;
-  }
+  
 
   return (
     <>
+      {showAddProjectModal && (
+        <AddProjectCard onClose={() => setShowAddProjectModal(false)} />
+      )}
       <div>
         <h1 className="text-3xl font-bold p-8">Projects</h1>
       </div>
@@ -88,6 +86,7 @@ const ProjectDashboard = () => {
         <Button
           variant="secondary"
           className="flex items-center cursor-pointer px-2 w-full sm:w-auto justify-center sm:justify-start"
+          onClick={() => setShowAddProjectModal(true)}
         >
           <Plus width={18} />
           <p className="font-semibold opacity-95 pb-0.5 text-sm">
@@ -95,13 +94,20 @@ const ProjectDashboard = () => {
           </p>
         </Button>
       </div>
-      <div className="p-8 grid grid-cols-1 gap-4 md:grid-cols-2 w-full max-w-3xl md:max-w-full mx-auto">
-        {projects.map((project: ProjectProps) => (
-          <ProjectCard key={project.id} project={project} />
-        ))}
-      </div>
+  
+      {error ? (
+        <div className="p-8 text-red-500">{error}</div>
+      ) : isLoading ? (
+        <div className="p-8"><Spinner /></div>
+      ) : (
+        <div className="p-8 grid grid-cols-1 gap-4 md:grid-cols-2 w-full max-w-3xl md:max-w-full mx-auto">
+          {projects.map((project: ProjectProps) => (
+            <ProjectCard key={project.id} project={project} />
+          ))}
+        </div>
+      )}
     </>
   );
-};
+}
 
 export default ProjectDashboard;

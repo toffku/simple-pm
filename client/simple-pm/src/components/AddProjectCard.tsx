@@ -2,7 +2,6 @@ import { Label } from "@radix-ui/react-dropdown-menu";
 import { Button } from "./ui/button";
 import { Card } from "./ui/card"
 import { Input } from "./ui/input"
-import { Calendar } from "./ui/calendar";
 import { DatePickerDemo } from "./DatePicker";
 
 const AddProjectCard = ({ onClose }: { onClose: () => void }) => {

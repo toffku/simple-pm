@@ -2,7 +2,7 @@ import { Label } from "@radix-ui/react-dropdown-menu";
 import { Button } from "./ui/button";
 import { Card } from "./ui/card"
 import { Input } from "./ui/input"
-import { DatePickerDemo } from "./DatePicker";
+import { DatePicker } from "./DatePicker";
 
 const AddProjectCard = ({ onClose }: { onClose: () => void }) => {
     return (
@@ -19,9 +19,9 @@ const AddProjectCard = ({ onClose }: { onClose: () => void }) => {
                 <Input type="text" placeholder="Project name" />
                 <Input type="text" placeholder="Project description" />
                 <Label className="text-sm font-medium">Project start date</Label>
-                <DatePickerDemo />
+                <DatePicker />
                 <Label className="text-sm font-medium">Project end date</Label>
-                <DatePickerDemo />
+                <DatePicker />
                 <div className="flex gap-2 justify-end">
                   <Button variant="secondary" type="button" onClick={onClose} className="cursor-pointer">
                     Cancel

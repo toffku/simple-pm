@@ -1,18 +1,20 @@
 import { ProjectProps } from "@/types";
 import ProjectCard from "./ProjectCard";
-import { ArrowDownUp, Plus } from "lucide-react";
+import { Plus } from "lucide-react";
 import { Button } from "./ui/button";
 import { fetchJson } from "@/lib/api";
 import { ApiProject } from "@/types";
 import { useEffect, useMemo, useState } from "react";
 import { Spinner } from "./ui/spinner";
 import AddProjectCard from "./AddProjectCard";
+import { ProjectSortDropdown, SortOption } from "./ProjectSortDropdown";
 
 const ProjectDashboard = () => {
   const [projectsData, setProjectsData] = useState<ApiProject[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [showAddProjectModal, setShowAddProjectModal] = useState(false);
+  const [sortOption, setSortOption] = useState<SortOption>("newest");
   useEffect(() => {
     const loadProjects = async () => {
       try {
@@ -35,15 +37,20 @@ const ProjectDashboard = () => {
 
     return projectsData.map((project) => {
       const completedCount = project.tasks.filter((task) =>
-        (task.status ?? "").toLowerCase().includes("complete")
+        (task.status ?? "").toLowerCase().includes("complete"),
       ).length;
       const inProgressCount = project.tasks.filter((task) =>
-        (task.status ?? "").toLowerCase().includes("progress")
+        (task.status ?? "").toLowerCase().includes("progress"),
       ).length;
       const todoCount = project.tasks.length - completedCount - inProgressCount;
       const endDate = project.endDate ? new Date(project.endDate) : null;
       const daysLeft = endDate
-        ? Math.max(0, Math.ceil((endDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)))
+        ? Math.max(
+            0,
+            Math.ceil(
+              (endDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24),
+            ),
+          )
         : 0;
 
       return {
@@ -65,7 +72,19 @@ const ProjectDashboard = () => {
     });
   }, [projectsData]);
 
-  
+  const sortedProjects = useMemo<ProjectProps[]>(() => {
+    const copy = [...projects];
+    switch (sortOption) {
+      case "newest":
+        return copy.sort((a, b) => b.id - a.id);
+      case "oldest":
+        return copy.sort((a, b) => a.id - b.id);
+      case "alpha-asc":
+        return copy.sort((a, b) => a.title.localeCompare(b.title));
+      case "alpha-desc":
+        return copy.sort((a, b) => b.title.localeCompare(a.title));
+    }
+  }, [projects, sortOption]);
 
   return (
     <>
@@ -76,13 +95,7 @@ const ProjectDashboard = () => {
         <h1 className="text-3xl font-bold p-8">Projects</h1>
       </div>
       <div className="px-8 w-full flex flex-col gap-3 sm:flex-row sm:justify-between sm:items-center">
-        <Button
-          variant="secondary"
-          className="flex items-center bg-transparent cursor-pointer px-2 w-full sm:w-auto justify-center sm:justify-start"
-        >
-          <ArrowDownUp width={18} />
-          <p className="font-semibold opacity-95 text-sm">Sort</p>
-        </Button>
+        <ProjectSortDropdown value={sortOption} onChange={setSortOption} />
         <Button
           variant="secondary"
           className="flex items-center cursor-pointer px-2 w-full sm:w-auto justify-center sm:justify-start"
@@ -94,20 +107,22 @@ const ProjectDashboard = () => {
           </p>
         </Button>
       </div>
-  
+
       {error ? (
         <div className="p-8 text-red-500">{error}</div>
       ) : isLoading ? (
-        <div className="p-8"><Spinner /></div>
+        <div className="p-8">
+          <Spinner />
+        </div>
       ) : (
         <div className="p-8 grid grid-cols-1 gap-4 md:grid-cols-2 w-full max-w-3xl md:max-w-full mx-auto">
-          {projects.map((project: ProjectProps) => (
+          {sortedProjects.map((project: ProjectProps) => (
             <ProjectCard key={project.id} project={project} />
           ))}
         </div>
       )}
     </>
   );
-}
+};
 
 export default ProjectDashboard;

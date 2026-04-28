@@ -1,11 +1,12 @@
 import { TaskProps } from "@/types";
 import { Card } from "./ui/card";
 import { Badge } from "./ui/badge";
-import { CalendarDays } from "lucide-react";
+import { CalendarDays, Pencil } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface TaskCardProps {
   task: TaskProps;
+  onEdit?: () => void;
 }
 
 type PriorityVariant = "low" | "normal" | "high";
@@ -50,26 +51,45 @@ function formatDueDate(dateStr: string): string {
   });
 }
 
-const TaskCard = ({ task }: TaskCardProps) => {
+const TaskCard = ({ task, onEdit }: TaskCardProps) => {
   const priorityVariant = getPriorityVariant(task.priority || "Normal");
   const statusStyle = getStatusStyle(task.status);
 
   return (
-    <Card className="mb-3 p-4 gap-0 cursor-pointer transition-all duration-150 ease-in-out hover:bg-muted hover:shadow-md">
+    <Card className="group mb-3 p-4 gap-0 cursor-pointer transition-all duration-150 ease-in-out hover:bg-muted hover:shadow-md">
       <div className="flex items-center justify-between gap-2 mb-3">
         <Badge variant={priorityVariant} className="capitalize text-[11px]">
           {task.priority || "Normal"}
         </Badge>
-        <span
-          className={cn(
-            "inline-flex items-center gap-1.5 rounded-xl border px-2.5 py-[3px] text-[11px] font-medium",
-            statusStyle.border,
-            statusStyle.text
+        <div className="flex items-center gap-2">
+          <span
+            className={cn(
+              "inline-flex items-center gap-1.5 rounded-xl border px-2.5 py-[3px] text-[11px] font-medium",
+              statusStyle.border,
+              statusStyle.text,
+            )}
+          >
+            <span
+              className={cn(
+                "rounded-full w-1.5 h-1.5 shrink-0",
+                statusStyle.dot,
+              )}
+            />
+            {task.status}
+          </span>
+          {onEdit && (
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                onEdit();
+              }}
+              className="opacity-0 group-hover:opacity-100 transition-opacity rounded p-0.5 text-muted-foreground/60 hover:text-foreground focus-visible:opacity-100 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring cursor-pointer"
+              aria-label="Edit task"
+            >
+              <Pencil className="w-3.5 h-3.5" />
+            </button>
           )}
-        >
-          <span className={cn("rounded-full w-1.5 h-1.5 shrink-0", statusStyle.dot)} />
-          {task.status}
-        </span>
+        </div>
       </div>
 
       <h2 className="font-semibold text-sm leading-snug text-foreground mb-2">

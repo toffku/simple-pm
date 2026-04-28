@@ -2,6 +2,7 @@ import { fetchJson } from "@/lib/api";
 import { ApiProject, TaskProps } from "@/types";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import AddTaskCard from "./AddTaskCard";
+import EditTaskCard from "./EditTaskCard";
 import TaskCard from "./TaskCard";
 import { Spinner } from "./ui/spinner";
 import { Plus } from "lucide-react";
@@ -27,6 +28,7 @@ const TasksDashboard = ({ projectId }: TasksDashboardProps) => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [showAddTaskModal, setShowAddTaskModal] = useState(false);
+  const [editingTask, setEditingTask] = useState<TaskProps | null>(null);
 
   const loadProject = useCallback(async () => {
     try {
@@ -106,6 +108,13 @@ const TasksDashboard = ({ projectId }: TasksDashboardProps) => {
           onTaskCreated={() => void loadProject()}
         />
       )}
+      {editingTask && (
+        <EditTaskCard
+          task={editingTask}
+          onClose={() => setEditingTask(null)}
+          onTaskUpdated={() => void loadProject()}
+        />
+      )}
       <div className="flex flex-row justify-between items-center p-8">
         <h1 className="text-3xl font-bold">{project.name}</h1>
         <Button
@@ -124,7 +133,7 @@ const TasksDashboard = ({ projectId }: TasksDashboardProps) => {
       </div>
       <div className="p-8">
         {groupedTasks.todo.map((task: TaskProps) => (
-          <TaskCard key={task.id} task={task} />
+          <TaskCard key={task.id} task={task} onEdit={() => setEditingTask(task)} />
         ))}
       </div>
       <div className="mx-8 p-4 rounded-md border bg-card border-l-8 border-l-indigo-700">
@@ -132,7 +141,7 @@ const TasksDashboard = ({ projectId }: TasksDashboardProps) => {
       </div>
       <div className="p-8">
         {groupedTasks.inProgress.map((task: TaskProps) => (
-          <TaskCard key={task.id} task={task} />
+          <TaskCard key={task.id} task={task} onEdit={() => setEditingTask(task)} />
         ))}
       </div>
       <div className="mx-8 p-4 rounded-md border bg-card border-l-8 border-l-green-700">
@@ -140,7 +149,7 @@ const TasksDashboard = ({ projectId }: TasksDashboardProps) => {
       </div>
       <div className="p-8">
         {groupedTasks.completed.map((task: TaskProps) => (
-          <TaskCard key={task.id} task={task} />
+          <TaskCard key={task.id} task={task} onEdit={() => setEditingTask(task)} />
         ))}
       </div>
     </>

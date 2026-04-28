@@ -1,5 +1,5 @@
 import prisma from "../config/prisma.js";
-import type { CreateTaskInput } from "../types/api.types.js";
+import type { CreateTaskInput, UpdateTaskInput } from "../types/api.types.js";
 import { AppError } from "../utils/AppError.js";
 
 const taskInclude = {
@@ -35,6 +35,23 @@ export async function createTask(data: CreateTaskInput) {
       dueDate: data.dueDate,
       projectId: data.projectId,
       authorUserId: author.id,
+    },
+    include: taskInclude,
+  });
+}
+
+export async function updateTask(id: number, data: UpdateTaskInput) {
+  const existing = await prisma.task.findUnique({ where: { id } });
+  if (!existing) throw new AppError(404, "Task not found.");
+
+  return prisma.task.update({
+    where: { id },
+    data: {
+      title: data.title,
+      description: data.description,
+      status: data.status,
+      priority: data.priority,
+      dueDate: data.dueDate,
     },
     include: taskInclude,
   });

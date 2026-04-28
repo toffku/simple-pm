@@ -1,6 +1,9 @@
 import type { Request, Response } from "express";
 import * as taskService from "../services/task.service.js";
-import { validateCreateTask } from "../validators/task.validator.js";
+import {
+  validateCreateTask,
+  validateUpdateTask,
+} from "../validators/task.validator.js";
 import { parseId } from "../utils/parseId.js";
 import { AppError } from "../utils/AppError.js";
 
@@ -25,4 +28,15 @@ export async function createTask(req: Request, res: Response): Promise<void> {
 
   const task = await taskService.createTask(validation.data);
   res.status(201).json(task);
+}
+
+export async function updateTask(req: Request, res: Response): Promise<void> {
+  const id = parseId(req.params.id);
+  if (id === null) throw new AppError(400, "Task id must be a number.");
+
+  const validation = validateUpdateTask(req.body);
+  if (!validation.ok) throw new AppError(validation.status, validation.error);
+
+  const task = await taskService.updateTask(id, validation.data);
+  res.status(200).json(task);
 }

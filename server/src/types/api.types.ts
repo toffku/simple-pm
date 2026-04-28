@@ -12,3 +12,11 @@ export interface CreateTaskInput {
   dueDate: Date | null;
   projectId: number;
 }
+
+export interface UpdateTaskInput {
+  title: string;
+  description: string | null;
+  status: string | null;
+  priority: string | null;
+  dueDate: Date | null;
+}

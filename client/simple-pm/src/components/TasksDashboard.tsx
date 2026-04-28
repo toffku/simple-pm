@@ -1,8 +1,11 @@
 import { fetchJson } from "@/lib/api";
 import { ApiProject, TaskProps } from "@/types";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import AddTaskCard from "./AddTaskCard";
 import TaskCard from "./TaskCard";
 import { Spinner } from "./ui/spinner";
+import { Plus } from "lucide-react";
+import { Button } from "./ui/button";
 
 type TaskColumn = "todo" | "inProgress" | "completed";
 
@@ -23,25 +26,28 @@ const TasksDashboard = ({ projectId }: TasksDashboardProps) => {
   const [project, setProject] = useState<ApiProject | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [showAddTaskModal, setShowAddTaskModal] = useState(false);
+
+  const loadProject = useCallback(async () => {
+    try {
+      setIsLoading(true);
+      setError(null);
+      const normalizedProjectId = normalizeProjectId(projectId);
+      const data = await fetchJson<ApiProject>(
+        `/api/projects/${normalizedProjectId}`,
+      );
+      setProject(data);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Unknown error";
+      setError(`Unable to load project tasks. ${message}`);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [projectId]);
 
   useEffect(() => {
-    const loadProject = async () => {
-      try {
-        setIsLoading(true);
-        setError(null);
-        const normalizedProjectId = normalizeProjectId(projectId);
-        const data = await fetchJson<ApiProject>(`/api/projects/${normalizedProjectId}`);
-        setProject(data);
-      } catch (err) {
-        const message = err instanceof Error ? err.message : "Unknown error";
-        setError(`Unable to load project tasks. ${message}`);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
     void loadProject();
-  }, [projectId]);
+  }, [loadProject]);
 
   const groupedTasks = useMemo(() => {
     const grouped: Record<TaskColumn, TaskProps[]> = {
@@ -74,7 +80,11 @@ const TasksDashboard = ({ projectId }: TasksDashboardProps) => {
   }, [project]);
 
   if (isLoading) {
-    return <div className="p-8"><Spinner /></div>;
+    return (
+      <div className="p-8">
+        <Spinner />
+      </div>
+    );
   }
 
   if (error) {
@@ -85,10 +95,29 @@ const TasksDashboard = ({ projectId }: TasksDashboardProps) => {
     return <div className="p-8">Project not found.</div>;
   }
 
+  const numericProjectId = Number(normalizeProjectId(projectId));
+
   return (
     <>
-      <div>
-        <h1 className="text-3xl font-bold p-8">{project.name}</h1>
+      {showAddTaskModal && (
+        <AddTaskCard
+          projectId={numericProjectId}
+          onClose={() => setShowAddTaskModal(false)}
+          onTaskCreated={() => void loadProject()}
+        />
+      )}
+      <div className="flex flex-row justify-between items-center p-8">
+        <h1 className="text-3xl font-bold">{project.name}</h1>
+        <Button
+          variant="secondary"
+          className="flex items-center cursor-pointer px-2 w-full sm:w-auto justify-center sm:justify-start"
+          onClick={() => setShowAddTaskModal(true)}
+        >
+          <Plus width={18} />
+          <p className="font-semibold opacity-95 pb-0.5 text-sm">
+            Add a new task
+          </p>
+        </Button>
       </div>
       <div className="mx-8 p-4 rounded-md border border-l-8 bg-card border-l-pink-700">
         <h1 className="font-bold">To Do</h1>

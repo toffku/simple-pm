@@ -182,6 +182,76 @@ app.get("/api/tasks", async (_req, res, next) => {
   }
 });
 
+app.post("/api/tasks", async (req, res, next) => {
+  try {
+    const { title, description, priority, dueDate, projectId } = req.body as {
+      title?: unknown;
+      description?: unknown;
+      priority?: unknown;
+      dueDate?: unknown;
+      projectId?: unknown;
+    };
+
+    if (typeof title !== "string" || !title.trim()) {
+      res.status(400).json({ error: "Task title is required." });
+      return;
+    }
+
+    if (typeof projectId !== "number" || !Number.isInteger(projectId) || projectId <= 0) {
+      res.status(400).json({ error: "A valid project ID is required." });
+      return;
+    }
+
+    const parsedDueDate = typeof dueDate === "string" ? new Date(dueDate) : null;
+    if (parsedDueDate !== null && isNaN(parsedDueDate.getTime())) {
+      res.status(400).json({ error: "Invalid due date." });
+      return;
+    }
+
+    const project = await prisma.project.findUnique({ where: { id: projectId } });
+    if (!project) {
+      res.status(404).json({ error: "Project not found." });
+      return;
+    }
+
+    const author = await prisma.user.findFirst();
+    if (!author) {
+      res.status(500).json({ error: "No users exist. Please seed the database first." });
+      return;
+    }
+
+    const task = await prisma.task.create({
+      data: {
+        title: title.trim(),
+        description:
+          typeof description === "string" && description.trim()
+            ? description.trim()
+            : null,
+        status: "To Do",
+        priority:
+          typeof priority === "string" && priority.trim()
+            ? priority.trim()
+            : null,
+        dueDate: parsedDueDate,
+        projectId,
+        authorUserId: author.id,
+      },
+      include: {
+        project: true,
+        author: true,
+        assignee: true,
+        attachments: true,
+        comments: { include: { user: true } },
+        taskAssignments: { include: { user: true } },
+      },
+    });
+
+    res.status(201).json(task);
+  } catch (error) {
+    next(error);
+  }
+});
+
 app.get("/api/tasks/:id", async (req, res, next) => {
   try {
     const taskId = Number(req.params.id);

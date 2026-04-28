@@ -8,8 +8,16 @@ import { Button } from "./ui/button";
 import { Calendar } from "./ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
 
-export function DatePicker() {
-  const [date, setDate] = React.useState<Date>();
+type DatePickerProps = {
+  value?: Date;
+  onChange?: (date: Date | undefined) => void;
+};
+
+export function DatePicker({ value, onChange }: DatePickerProps) {
+  const [localDate, setLocalDate] = React.useState<Date>();
+  const isControlled = onChange !== undefined;
+  const date = isControlled ? value : localDate;
+  const handleSelect = isControlled ? onChange : setLocalDate;
 
   return (
     <Popover>
@@ -24,7 +32,7 @@ export function DatePicker() {
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-auto p-0">
-        <Calendar mode="single" selected={date} onSelect={setDate} />
+        <Calendar mode="single" selected={date} onSelect={handleSelect} />
       </PopoverContent>
     </Popover>
   );

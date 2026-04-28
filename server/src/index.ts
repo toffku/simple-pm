@@ -4,7 +4,7 @@ import dotenv from "dotenv";
 import bodyParser from "body-parser";
 import helmet from "helmet";
 import morgan from "morgan";
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient, Prisma } from "@prisma/client";
 
 dotenv.config();
 const app = express();
@@ -91,6 +91,67 @@ app.get("/api/projects/:id", async (req, res, next) => {
 
     res.status(200).json(project);
   } catch (error) {
+    next(error);
+  }
+});
+
+app.post("/api/projects", async (req, res, next) => {
+  try {
+    const { name, description, startDate, endDate } = req.body as {
+      name?: unknown;
+      description?: unknown;
+      startDate?: unknown;
+      endDate?: unknown;
+    };
+
+    if (typeof name !== "string" || !name.trim()) {
+      res.status(400).json({ error: "Project name is required." });
+      return;
+    }
+
+    const parsedStartDate =
+      typeof startDate === "string" ? new Date(startDate) : null;
+    const parsedEndDate =
+      typeof endDate === "string" ? new Date(endDate) : null;
+
+    if (parsedStartDate !== null && isNaN(parsedStartDate.getTime())) {
+      res.status(400).json({ error: "Invalid start date." });
+      return;
+    }
+    if (parsedEndDate !== null && isNaN(parsedEndDate.getTime())) {
+      res.status(400).json({ error: "Invalid end date." });
+      return;
+    }
+
+    const project = await prisma.project.create({
+      data: {
+        name: name.trim(),
+        description:
+          typeof description === "string" && description.trim()
+            ? description.trim()
+            : null,
+        startDate: parsedStartDate,
+        endDate: parsedEndDate,
+      },
+      include: {
+        tasks: true,
+        projectTeams: {
+          include: {
+            team: true,
+          },
+        },
+      },
+    });
+
+    res.status(201).json(project);
+  } catch (error) {
+    if (
+      error instanceof Prisma.PrismaClientKnownRequestError &&
+      error.code === "P2002"
+    ) {
+      res.status(409).json({ error: "Could not create project due to a conflict. Please try again." });
+      return;
+    }
     next(error);
   }
 });

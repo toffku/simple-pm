@@ -69,6 +69,28 @@ async function upsertFromFile(filePath: string) {
   console.log(`Upserted ${jsonData.length} rows into ${modelName}`);
 }
 
+// Seed inserts rows with explicit IDs, which bypasses PostgreSQL SERIAL sequences.
+// This resets each sequence to MAX(id) so future INSERTs don't collide.
+async function resetSequences() {
+  const tables = [
+    "Team",
+    "Project",
+    "ProjectTeam",
+    "User",
+    "Task",
+    "Attachment",
+    "Comment",
+    "TaskAssignment",
+  ];
+
+  for (const table of tables) {
+    await prisma.$executeRawUnsafe(
+      `SELECT setval(pg_get_serial_sequence('"${table}"', 'id'), COALESCE((SELECT MAX(id) FROM "${table}"), 1))`
+    );
+  }
+  console.log("Sequences synced with seeded IDs.");
+}
+
 async function main() {
   const dataDirectory = path.join(__dirname, "seedData");
   const orderedFileNames = [
@@ -86,6 +108,8 @@ async function main() {
     const filePath = path.join(dataDirectory, fileName);
     await upsertFromFile(filePath);
   }
+
+  await resetSequences();
 }
 
 main()

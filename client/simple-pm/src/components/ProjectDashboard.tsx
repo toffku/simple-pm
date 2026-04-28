@@ -92,7 +92,10 @@ const ProjectDashboard = () => {
   return (
     <>
       {showAddProjectModal && (
-        <AddProjectCard onClose={() => setShowAddProjectModal(false)} />
+        <AddProjectCard
+          onClose={() => setShowAddProjectModal(false)}
+          onProjectCreated={() => void loadProjects()}
+        />
       )}
       <div>
         <h1 className="text-3xl font-bold p-8">Projects</h1>

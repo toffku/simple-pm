@@ -4,10 +4,12 @@ import { Plus } from "lucide-react";
 import { Button } from "./ui/button";
 import { fetchJson } from "@/lib/api";
 import { ApiProject } from "@/types";
-import { useEffect, useMemo, useState } from "react";
-import { Spinner } from "./ui/spinner";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import AddProjectCard from "./AddProjectCard";
 import { ProjectSortDropdown, SortOption } from "./ProjectSortDropdown";
+import { ProjectLoadingState } from "./ProjectLoadingState";
+import { ProjectErrorState } from "./ProjectErrorState";
+import { ProjectEmptyState } from "./ProjectEmptyState";
 
 const ProjectDashboard = () => {
   const [projectsData, setProjectsData] = useState<ApiProject[]>([]);
@@ -15,22 +17,23 @@ const ProjectDashboard = () => {
   const [error, setError] = useState<string | null>(null);
   const [showAddProjectModal, setShowAddProjectModal] = useState(false);
   const [sortOption, setSortOption] = useState<SortOption>("newest");
-  useEffect(() => {
-    const loadProjects = async () => {
-      try {
-        setIsLoading(true);
-        setError(null);
-        const data = await fetchJson<ApiProject[]>("/api/projects");
-        setProjectsData(data);
-      } catch (_error) {
-        setError("Unable to load projects.");
-      } finally {
-        setIsLoading(false);
-      }
-    };
 
-    void loadProjects();
+  const loadProjects = useCallback(async () => {
+    try {
+      setIsLoading(true);
+      setError(null);
+      const data = await fetchJson<ApiProject[]>("/api/projects");
+      setProjectsData(data);
+    } catch (_error) {
+      setError("Unable to load projects.");
+    } finally {
+      setIsLoading(false);
+    }
   }, []);
+
+  useEffect(() => {
+    void loadProjects();
+  }, [loadProjects]);
 
   const projects = useMemo<ProjectProps[]>(() => {
     const now = new Date();
@@ -108,12 +111,12 @@ const ProjectDashboard = () => {
         </Button>
       </div>
 
-      {error ? (
-        <div className="p-8 text-red-500">{error}</div>
-      ) : isLoading ? (
-        <div className="p-8">
-          <Spinner />
-        </div>
+      {isLoading ? (
+        <ProjectLoadingState />
+      ) : error ? (
+        <ProjectErrorState onRetry={() => void loadProjects()} />
+      ) : sortedProjects.length === 0 ? (
+        <ProjectEmptyState onAddProject={() => setShowAddProjectModal(true)} />
       ) : (
         <div className="p-8 grid grid-cols-1 gap-4 md:grid-cols-2 w-full max-w-3xl md:max-w-full mx-auto">
           {sortedProjects.map((project: ProjectProps) => (

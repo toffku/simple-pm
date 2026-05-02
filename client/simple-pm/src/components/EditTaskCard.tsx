@@ -5,7 +5,7 @@ import { Input } from "./ui/input";
 import { DatePicker } from "./DatePicker";
 import { patchJson } from "@/lib/api";
 import { ApiTask, TaskProps } from "@/types";
-import { cn } from "@/lib/utils";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
 
 const TITLE_MAX = 150;
 const DESCRIPTION_MAX = 1000;
@@ -90,12 +90,6 @@ const EditTaskCard = ({ task, onClose, onTaskUpdated }: Props) => {
     }
   };
 
-  const selectClassName = cn(
-    "border-input dark:bg-input/30 h-9 w-full rounded-md border bg-transparent px-3 py-1 text-sm shadow-xs outline-none",
-    "focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]",
-    "disabled:pointer-events-none disabled:opacity-50",
-  );
-
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center"
@@ -137,34 +131,30 @@ const EditTaskCard = ({ task, onClose, onTaskUpdated }: Props) => {
 
           <div className="flex flex-col gap-1.5">
             <label className="text-sm font-medium">Status</label>
-            <select
-              value={status}
-              onChange={(e) => setStatus(e.target.value as Status)}
-              disabled={isSubmitting}
-              className={selectClassName}
-            >
-              {STATUS_OPTIONS.map((s) => (
-                <option key={s} value={s}>
-                  {s}
-                </option>
-              ))}
-            </select>
+            <Select value={status} onValueChange={(v) => setStatus(v as Status)} disabled={isSubmitting}>
+              <SelectTrigger className="w-full">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent position="popper">
+                {STATUS_OPTIONS.map((s) => (
+                  <SelectItem key={s} value={s}>{s}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
 
           <div className="flex flex-col gap-1.5">
             <label className="text-sm font-medium">Priority</label>
-            <select
-              value={priority}
-              onChange={(e) => setPriority(e.target.value as Priority)}
-              disabled={isSubmitting}
-              className={selectClassName}
-            >
-              {PRIORITY_OPTIONS.map((p) => (
-                <option key={p} value={p}>
-                  {p}
-                </option>
-              ))}
-            </select>
+            <Select value={priority} onValueChange={(v) => setPriority(v as Priority)} disabled={isSubmitting}>
+              <SelectTrigger className="w-full">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent position="popper">
+                {PRIORITY_OPTIONS.map((p) => (
+                  <SelectItem key={p} value={p}>{p}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
 
           <div className="flex flex-col gap-1.5">

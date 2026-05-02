@@ -4,6 +4,7 @@ import { Card } from "./ui/card";
 import { Badge } from "./ui/badge";
 import { CalendarDays, Pencil } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { statusColors, urgencyColors } from "@/lib/theme";
 
 interface TaskCardProps {
   task: TaskProps;
@@ -25,12 +26,12 @@ type StatusStyle = { dot: string; text: string; border: string };
 function getStatusStyle(status: string): StatusStyle {
   const s = status.toLowerCase();
   if (s.includes("progress")) {
-    return { dot: "bg-indigo-500", text: "text-indigo-400", border: "border-indigo-500/40" };
+    return { dot: statusColors.inProgress.dot, text: statusColors.inProgress.text, border: statusColors.inProgress.border };
   }
   if (s.includes("complete") || s.includes("done")) {
-    return { dot: "bg-green-500", text: "text-green-400", border: "border-green-500/40" };
+    return { dot: statusColors.done.dot, text: statusColors.done.text, border: statusColors.done.border };
   }
-  return { dot: "bg-pink-500", text: "text-pink-400", border: "border-pink-500/40" };
+  return { dot: statusColors.todo.dot, text: statusColors.todo.text, border: statusColors.todo.border };
 }
 
 type DueDateInfo = { label: string; className: string };
@@ -47,13 +48,13 @@ function getDueDateInfo(dateStr: string | null): DueDateInfo {
   const diffDays = Math.round((due.getTime() - today.getTime()) / 86_400_000);
 
   if (diffDays < 0) {
-    return { label: formatDueDate(dateStr), className: "text-red-400 font-medium" };
+    return { label: formatDueDate(dateStr), className: `${urgencyColors.overdue} font-medium` };
   }
   if (diffDays === 0) {
-    return { label: "Today", className: "text-amber-400" };
+    return { label: "Today", className: urgencyColors.today };
   }
   if (diffDays === 1) {
-    return { label: "Tomorrow", className: "text-amber-400/70" };
+    return { label: "Tomorrow", className: urgencyColors.tomorrow };
   }
   return { label: formatDueDate(dateStr), className: "text-muted-foreground/60" };
 }

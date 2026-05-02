@@ -1,5 +1,6 @@
 import { cn } from "@/lib/utils";
 import { Progress } from "./ui/progress";
+import { urgencyColors } from "@/lib/theme";
 
 interface ProjectOverviewHeaderProps {
   completedCount: number;
@@ -17,8 +18,8 @@ function getDaysLeft(endDate: string | null): number | null {
 }
 
 function daysLeftClass(days: number): string {
-  if (days <= 3) return "text-red-400";
-  if (days <= 10) return "text-amber-400";
+  if (days <= 3) return urgencyColors.critical;
+  if (days <= 10) return urgencyColors.warning;
   return "text-foreground";
 }
 
@@ -58,8 +59,8 @@ export function ProjectOverviewHeader({
           </div>
           <Progress
             segments={[
-              { value: completedPct, color: "bg-green-500" },
-              { value: inProgressPct, color: "bg-orange-500" },
+              { value: completedPct, color: "bg-emerald-500" },
+              { value: inProgressPct, color: "bg-sky-500" },
             ]}
             className="h-3"
           />

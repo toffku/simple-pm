@@ -265,7 +265,7 @@ const TasksDashboard = ({ projectId }: TasksDashboardProps) => {
         totalCount={project.tasks.length}
         endDate={project.endDate}
       />
-      <div className="mx-4 sm:mx-8 p-4 rounded-md border border-l-8 bg-card border-l-pink-700">
+      <div className="mx-4 sm:mx-8 p-4 rounded-md border border-l-8 bg-card border-l-violet-600 dark:border-l-violet-500">
         <h1 className="font-bold">To Do</h1>
       </div>
       <div className="p-4 sm:p-8">
@@ -281,7 +281,7 @@ const TasksDashboard = ({ projectId }: TasksDashboardProps) => {
           />
         ))}
       </div>
-      <div className="mx-4 sm:mx-8 p-4 rounded-md border bg-card border-l-8 border-l-indigo-700">
+      <div className="mx-4 sm:mx-8 p-4 rounded-md border bg-card border-l-8 border-l-sky-600 dark:border-l-sky-500">
         <h1 className="font-bold">In Progress</h1>
       </div>
       <div className="p-4 sm:p-8">
@@ -297,7 +297,7 @@ const TasksDashboard = ({ projectId }: TasksDashboardProps) => {
           />
         ))}
       </div>
-      <div className="mx-4 sm:mx-8 p-4 rounded-md border bg-card border-l-8 border-l-green-700">
+      <div className="mx-4 sm:mx-8 p-4 rounded-md border bg-card border-l-8 border-l-emerald-600 dark:border-l-emerald-500">
         <h1 className="font-bold">Completed</h1>
       </div>
       <div className="p-4 sm:p-8">

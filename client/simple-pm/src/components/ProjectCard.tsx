@@ -21,31 +21,31 @@ const ProjectCard = ({ project }: ProjectCardProps) => {
         <div className="text-xs flex flex-wrap gap-2 py-4 sm:py-5">
           <Badge
             variant="outline"
-            className="border-green-600 text-green-600 px-2"
+            className="border-emerald-500/40 text-emerald-700 dark:border-emerald-400/40 dark:text-emerald-400 px-2"
           >
-            <span className="rounded-full w-2 h-2 bg-green-500 opacity-50"></span>
+            <span className="rounded-full w-2 h-2 bg-emerald-500 dark:bg-emerald-400 opacity-60"></span>
             {project.completedCount} Completed
           </Badge>
           <Badge
             variant="outline"
-            className="border-orange-500 text-orange-500 px-2"
+            className="border-sky-500/40 text-sky-700 dark:border-sky-400/40 dark:text-sky-400 px-2"
           >
-            <span className="rounded-full w-2 h-2 bg-orange-500 opacity-50"></span>
+            <span className="rounded-full w-2 h-2 bg-sky-500 dark:bg-sky-400 opacity-60"></span>
             {project.inProgressCount} In Progress
           </Badge>
           <Badge
             variant="outline"
-            className="border-gray-200/50 text-gray-200/50 px-2"
+            className="border-violet-500/40 text-violet-700 dark:border-violet-400/40 dark:text-violet-400 px-2"
           >
-            <span className="rounded-full w-2 h-2 bg-gray-200 opacity-50"></span>
+            <span className="rounded-full w-2 h-2 bg-violet-500 dark:bg-violet-400 opacity-60"></span>
             {project.todoCount} Not Complete
           </Badge>
         </div>
         <span className="w-full">
           <Progress
             segments={[
-              { value: completedPct, color: "bg-green-500" },
-              { value: inProgressPct, color: "bg-orange-500" },
+              { value: completedPct, color: "bg-emerald-500" },
+              { value: inProgressPct, color: "bg-sky-500" },
             ]}
           />
         </span>

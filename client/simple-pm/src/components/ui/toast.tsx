@@ -38,7 +38,8 @@ export function StatusToast({
   return (
     <div
       className={cn(
-        "fixed bottom-6 right-6 z-50 min-w-72 max-w-sm",
+        "fixed bottom-6 left-4 right-4 z-50",
+        "sm:left-auto sm:right-6 sm:min-w-72 sm:max-w-sm",
         "rounded-lg border border-border bg-card shadow-xl overflow-hidden",
         "animate-in slide-in-from-bottom-4 fade-in duration-200",
       )}

@@ -241,7 +241,7 @@ const TasksDashboard = ({ projectId }: TasksDashboardProps) => {
       )}
       {toast && (
         <StatusToast
-          message={`"${toast.taskTitle}" → ${displayStatus(toast.newStatus)}`}
+          message={`"${toast.taskTitle}" moved to ${displayStatus(toast.newStatus)}`}
           onUndo={handleUndo}
           onDismiss={() => setToast(null)}
           duration={COMMIT_DELAY_MS}

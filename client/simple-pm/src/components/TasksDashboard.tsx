@@ -4,8 +4,9 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import AddTaskCard from "./AddTaskCard";
 import EditTaskCard from "./EditTaskCard";
 import TaskCard from "./TaskCard";
-import { Spinner } from "./ui/spinner";
 import { StatusToast } from "./ui/toast";
+import { ProjectViewLoadingState } from "./ProjectViewLoadingState";
+import { ProjectViewErrorState } from "./ProjectViewErrorState";
 import { Plus } from "lucide-react";
 import { Button } from "./ui/button";
 
@@ -214,21 +215,9 @@ const TasksDashboard = ({ projectId }: TasksDashboardProps) => {
     setToast(null);
   };
 
-  if (isLoading) {
-    return (
-      <div className="p-4 sm:p-8">
-        <Spinner />
-      </div>
-    );
-  }
-
-  if (error) {
-    return <div className="p-8 text-red-500">{error}</div>;
-  }
-
-  if (!project) {
-    return <div className="p-8">Project not found.</div>;
-  }
+  if (isLoading) return <ProjectViewLoadingState />;
+  if (error) return <ProjectViewErrorState onRetry={() => void loadProject()} />;
+  if (!project) return <ProjectViewErrorState onRetry={() => void loadProject()} />;
 
   const numericProjectId = Number(normalizeProjectId(projectId));
 

@@ -7,6 +7,7 @@ import { cn } from "@/lib/utils";
 interface TaskCardProps {
   task: TaskProps;
   onEdit?: () => void;
+  onStatusAdvance?: () => void;
 }
 
 type PriorityVariant = "low" | "normal" | "high";
@@ -51,32 +52,43 @@ function formatDueDate(dateStr: string): string {
   });
 }
 
-const TaskCard = ({ task, onEdit }: TaskCardProps) => {
+const TaskCard = ({ task, onEdit, onStatusAdvance }: TaskCardProps) => {
   const priorityVariant = getPriorityVariant(task.priority || "Normal");
   const statusStyle = getStatusStyle(task.status);
+  const isCompleted =
+    task.status.toLowerCase().includes("complete") ||
+    task.status.toLowerCase().includes("done");
 
   return (
-    <Card className="group mb-3 p-4 gap-0 cursor-pointer transition-all duration-150 ease-in-out hover:bg-muted hover:shadow-md">
+    <Card
+      className={cn(
+        "group mb-3 p-4 gap-0 cursor-pointer transition-all duration-150 ease-in-out hover:bg-muted hover:shadow-md",
+        isCompleted && "opacity-60",
+      )}
+    >
       <div className="flex items-center justify-between gap-2 mb-3">
         <Badge variant={priorityVariant} className="capitalize text-[11px]">
           {task.priority || "Normal"}
         </Badge>
         <div className="flex items-center gap-2">
-          <span
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              onStatusAdvance?.();
+            }}
+            title="Click to advance status"
             className={cn(
               "inline-flex items-center gap-1.5 rounded-xl border px-2.5 py-[3px] text-[11px] font-medium",
+              "transition-opacity hover:opacity-70 active:scale-95 cursor-pointer",
               statusStyle.border,
               statusStyle.text,
             )}
           >
             <span
-              className={cn(
-                "rounded-full w-1.5 h-1.5 shrink-0",
-                statusStyle.dot,
-              )}
+              className={cn("rounded-full w-1.5 h-1.5 shrink-0", statusStyle.dot)}
             />
             {task.status}
-          </span>
+          </button>
           {onEdit && (
             <button
               onClick={(e) => {
@@ -92,7 +104,12 @@ const TaskCard = ({ task, onEdit }: TaskCardProps) => {
         </div>
       </div>
 
-      <h2 className="font-semibold text-sm leading-snug text-foreground mb-2">
+      <h2
+        className={cn(
+          "font-semibold text-sm leading-snug text-foreground mb-2",
+          isCompleted && "line-through",
+        )}
+      >
         {task.title}
       </h2>
 

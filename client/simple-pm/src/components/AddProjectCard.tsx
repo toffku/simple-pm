@@ -72,12 +72,12 @@ const AddProjectCard = ({ onClose, onProjectCreated }: Props) => {
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center"
+      className="fixed inset-0 z-50 flex items-center justify-center p-4"
       style={{ backgroundColor: "rgba(0, 0, 0, 0.2)" }}
       onClick={onClose}
     >
       <Card
-        className="w-full max-w-md mx-4 p-6 flex flex-col gap-4"
+        className="w-full max-w-md p-6 flex flex-col gap-4 max-h-[90dvh] overflow-y-auto"
         onClick={(e) => e.stopPropagation()}
       >
         <h1 className="text-xl font-semibold">Add a new project</h1>

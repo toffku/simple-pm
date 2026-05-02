@@ -67,12 +67,12 @@ const AddTaskCard = ({ projectId, onClose, onTaskCreated }: Props) => {
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center"
+      className="fixed inset-0 z-50 flex items-center justify-center p-4"
       style={{ backgroundColor: "rgba(0, 0, 0, 0.5)" }}
       onClick={onClose}
     >
       <Card
-        className="w-full max-w-md mx-4 p-6 gap-0"
+        className="w-full max-w-md p-6 gap-0 max-h-[90dvh] overflow-y-auto"
         onClick={(e) => e.stopPropagation()}
       >
         <h2 className="text-xl font-semibold mb-4">Add a new task</h2>

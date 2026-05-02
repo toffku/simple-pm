@@ -98,9 +98,9 @@ const ProjectDashboard = () => {
         />
       )}
       <div>
-        <h1 className="text-3xl font-bold p-8">Projects</h1>
+        <h1 className="text-3xl font-bold p-4 sm:p-8">Projects</h1>
       </div>
-      <div className="px-8 w-full flex flex-col gap-3 sm:flex-row sm:justify-between sm:items-center">
+      <div className="px-4 sm:px-8 w-full flex flex-col gap-3 sm:flex-row sm:justify-between sm:items-center">
         <ProjectSortDropdown value={sortOption} onChange={setSortOption} />
         <Button
           variant="secondary"
@@ -121,7 +121,7 @@ const ProjectDashboard = () => {
       ) : sortedProjects.length === 0 ? (
         <ProjectEmptyState onAddProject={() => setShowAddProjectModal(true)} />
       ) : (
-        <div className="p-8 grid grid-cols-1 gap-4 md:grid-cols-2 w-full max-w-3xl md:max-w-full mx-auto">
+        <div className="p-4 sm:p-8 grid grid-cols-1 gap-4 md:grid-cols-2 w-full max-w-3xl md:max-w-full mx-auto">
           {sortedProjects.map((project: ProjectProps) => (
             <ProjectCard key={project.id} project={project} />
           ))}

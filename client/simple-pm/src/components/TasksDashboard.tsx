@@ -52,16 +52,22 @@ const TasksDashboard = ({ projectId }: TasksDashboardProps) => {
   const [error, setError] = useState<string | null>(null);
   const [showAddTaskModal, setShowAddTaskModal] = useState(false);
   const [editingTask, setEditingTask] = useState<TaskProps | null>(null);
-  const [statusOverrides, setStatusOverrides] = useState<Record<number, string>>({});
+  const [statusOverrides, setStatusOverrides] = useState<
+    Record<number, string>
+  >({});
   const [toast, setToast] = useState<ToastState | null>(null);
-  const pendingTimers = useRef<Record<number, ReturnType<typeof setTimeout>>>({});
+  const pendingTimers = useRef<Record<number, ReturnType<typeof setTimeout>>>(
+    {},
+  );
 
   const loadProject = useCallback(async () => {
     try {
       setIsLoading(true);
       setError(null);
       const normalizedProjectId = normalizeProjectId(projectId);
-      const data = await fetchJson<ApiProject>(`/api/projects/${normalizedProjectId}`);
+      const data = await fetchJson<ApiProject>(
+        `/api/projects/${normalizedProjectId}`,
+      );
       setProject(data);
       // Clear overrides for tasks that have no pending timer (already committed or stale)
       setStatusOverrides((prev) => {
@@ -97,7 +103,8 @@ const TasksDashboard = ({ projectId }: TasksDashboardProps) => {
     };
 
     project?.tasks.forEach((task) => {
-      const effectiveStatus = statusOverrides[task.id] ?? task.status ?? "To Do";
+      const effectiveStatus =
+        statusOverrides[task.id] ?? task.status ?? "To Do";
       const mappedTask: TaskProps = {
         id: task.id,
         title: task.title,
@@ -161,7 +168,8 @@ const TasksDashboard = ({ projectId }: TasksDashboardProps) => {
 
       void patchJson<ApiTask>(`/api/tasks/${task.id}`, {
         title: task.title,
-        description: task.description === "No description" ? null : task.description,
+        description:
+          task.description === "No description" ? null : task.description,
         status: newStatus,
         priority: task.priority || null,
         dueDate: task.date || null,
@@ -193,7 +201,8 @@ const TasksDashboard = ({ projectId }: TasksDashboardProps) => {
 
     setStatusOverrides((prev) => {
       // If prevStatus matches the server value, remove the override entirely
-      const serverStatus = project?.tasks.find((t) => t.id === taskId)?.status ?? "To Do";
+      const serverStatus =
+        project?.tasks.find((t) => t.id === taskId)?.status ?? "To Do";
       if (prevStatus === serverStatus) {
         const next = { ...prev };
         delete next[taskId];
@@ -207,7 +216,7 @@ const TasksDashboard = ({ projectId }: TasksDashboardProps) => {
 
   if (isLoading) {
     return (
-      <div className="p-8">
+      <div className="p-4 sm:p-8">
         <Spinner />
       </div>
     );
@@ -247,7 +256,7 @@ const TasksDashboard = ({ projectId }: TasksDashboardProps) => {
           duration={COMMIT_DELAY_MS}
         />
       )}
-      <div className="flex flex-row justify-between items-center p-8">
+      <div className="flex flex-col gap-3 sm:flex-row sm:justify-between sm:items-center p-4 sm:p-8">
         <h1 className="text-3xl font-bold">{project.name}</h1>
         <Button
           variant="secondary"
@@ -260,10 +269,10 @@ const TasksDashboard = ({ projectId }: TasksDashboardProps) => {
           </p>
         </Button>
       </div>
-      <div className="mx-8 p-4 rounded-md border border-l-8 bg-card border-l-pink-700">
+      <div className="mx-4 sm:mx-8 p-4 rounded-md border border-l-8 bg-card border-l-pink-700">
         <h1 className="font-bold">To Do</h1>
       </div>
-      <div className="p-8">
+      <div className="p-4 sm:p-8">
         {groupedTasks.todo.map((task: TaskProps) => (
           <TaskCard
             key={task.id}
@@ -276,10 +285,10 @@ const TasksDashboard = ({ projectId }: TasksDashboardProps) => {
           />
         ))}
       </div>
-      <div className="mx-8 p-4 rounded-md border bg-card border-l-8 border-l-indigo-700">
+      <div className="mx-4 sm:mx-8 p-4 rounded-md border bg-card border-l-8 border-l-indigo-700">
         <h1 className="font-bold">In Progress</h1>
       </div>
-      <div className="p-8">
+      <div className="p-4 sm:p-8">
         {groupedTasks.inProgress.map((task: TaskProps) => (
           <TaskCard
             key={task.id}
@@ -292,10 +301,10 @@ const TasksDashboard = ({ projectId }: TasksDashboardProps) => {
           />
         ))}
       </div>
-      <div className="mx-8 p-4 rounded-md border bg-card border-l-8 border-l-green-700">
+      <div className="mx-4 sm:mx-8 p-4 rounded-md border bg-card border-l-8 border-l-green-700">
         <h1 className="font-bold">Completed</h1>
       </div>
-      <div className="p-8">
+      <div className="p-4 sm:p-8">
         {groupedTasks.completed.map((task: TaskProps) => (
           <TaskCard
             key={task.id}

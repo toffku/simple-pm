@@ -7,6 +7,7 @@ import TaskCard from "./TaskCard";
 import { StatusToast } from "./ui/toast";
 import { ProjectViewLoadingState } from "./ProjectViewLoadingState";
 import { ProjectViewErrorState } from "./ProjectViewErrorState";
+import { ProjectOverviewHeader } from "./ProjectOverviewHeader";
 import { Plus } from "lucide-react";
 import { Button } from "./ui/button";
 
@@ -258,6 +259,12 @@ const TasksDashboard = ({ projectId }: TasksDashboardProps) => {
           </p>
         </Button>
       </div>
+      <ProjectOverviewHeader
+        completedCount={groupedTasks.completed.length}
+        inProgressCount={groupedTasks.inProgress.length}
+        totalCount={project.tasks.length}
+        endDate={project.endDate}
+      />
       <div className="mx-4 sm:mx-8 p-4 rounded-md border border-l-8 bg-card border-l-pink-700">
         <h1 className="font-bold">To Do</h1>
       </div>

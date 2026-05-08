@@ -13,9 +13,15 @@ export type ProjectProps = {
   title: string;
   status: string;
   daysLeft: number;
+  isOverdue: boolean;
   completedCount: number;
   inProgressCount: number;
   todoCount: number;
+  overdueTaskCount: number;
+  dueSoonCount: number;
+  highPriorityCount: number;
+  nextDueTask: { title: string; dueDate: string | null } | null;
+  attentionScore: number;
   tasks: TaskProps[];
 };
 

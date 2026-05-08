@@ -10,13 +10,14 @@ import { ProjectSortDropdown, SortOption } from "./ProjectSortDropdown";
 import { ProjectLoadingState } from "./ProjectLoadingState";
 import { ProjectErrorState } from "./ProjectErrorState";
 import { ProjectEmptyState } from "./ProjectEmptyState";
+import { DashboardStats } from "./DashboardStats";
 
 const ProjectDashboard = () => {
   const [projectsData, setProjectsData] = useState<ApiProject[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [showAddProjectModal, setShowAddProjectModal] = useState(false);
-  const [sortOption, setSortOption] = useState<SortOption>("newest");
+  const [sortOption, setSortOption] = useState<SortOption>("attention");
   const [showCompleted, setShowCompleted] = useState(false);
 
   const loadProjects = useCallback(async () => {
@@ -38,40 +39,92 @@ const ProjectDashboard = () => {
 
   const projects = useMemo<ProjectProps[]>(() => {
     const now = new Date();
+    const today = new Date(now);
+    today.setHours(0, 0, 0, 0);
+    const weekFromNow = new Date(today);
+    weekFromNow.setDate(today.getDate() + 7);
 
     return projectsData.map((project) => {
-      const completedCount = project.tasks.filter((task) =>
-        (task.status ?? "").toLowerCase().includes("complete"),
+      const completedCount = project.tasks.filter((t) =>
+        (t.status ?? "").toLowerCase().includes("complete"),
       ).length;
-      const inProgressCount = project.tasks.filter((task) =>
-        (task.status ?? "").toLowerCase().includes("progress"),
+      const inProgressCount = project.tasks.filter((t) =>
+        (t.status ?? "").toLowerCase().includes("progress"),
       ).length;
       const todoCount = project.tasks.length - completedCount - inProgressCount;
+
       const endDate = project.endDate ? new Date(project.endDate) : null;
-      const daysLeft = endDate
-        ? Math.max(
-            0,
-            Math.ceil(
-              (endDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24),
-            ),
-          )
+      const isOverdue = endDate ? endDate < now : false;
+      const daysLeft = endDate && !isOverdue
+        ? Math.ceil((endDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24))
         : 0;
+
+      const completedPct = Math.round(
+        (completedCount / Math.max(1, project.tasks.length)) * 100,
+      );
+
+      const openTasks = project.tasks.filter((t) => {
+        const s = (t.status ?? "").toLowerCase();
+        return !s.includes("complete") && !s.includes("done");
+      });
+
+      const overdueTaskCount = openTasks.filter((t) => {
+        if (!t.dueDate) return false;
+        const d = new Date(t.dueDate);
+        d.setHours(0, 0, 0, 0);
+        return d < today;
+      }).length;
+
+      const dueSoonCount = openTasks.filter((t) => {
+        if (!t.dueDate) return false;
+        const d = new Date(t.dueDate);
+        d.setHours(0, 0, 0, 0);
+        return d >= today && d <= weekFromNow;
+      }).length;
+
+      const highPriorityCount = openTasks.filter((t) => {
+        const p = (t.priority ?? "").toLowerCase();
+        return p === "high" || p === "urgent" || p === "critical";
+      }).length;
+
+      const nextDueTask =
+        openTasks
+          .filter((t) => t.dueDate)
+          .sort(
+            (a, b) =>
+              new Date(a.dueDate!).getTime() - new Date(b.dueDate!).getTime(),
+          )[0] ?? null;
+
+      const attentionScore =
+        (isOverdue ? 1000 : 0) +
+        overdueTaskCount * 50 +
+        highPriorityCount * 20 +
+        (project.tasks.length > 0 && completedPct < 25 ? 30 : 0) +
+        (daysLeft > 0 && daysLeft <= 7 ? (7 - daysLeft) * 10 : 0);
 
       return {
         id: project.id,
         title: project.name,
         status: project.status ?? "active",
         daysLeft,
+        isOverdue,
         completedCount,
         inProgressCount,
         todoCount,
-        tasks: project.tasks.map((task) => ({
-          id: task.id,
-          title: task.title,
-          date: task.dueDate,
-          description: task.description ?? "No description",
-          status: task.status ?? "To Do",
-          priority: task.priority ?? "Normal",
+        overdueTaskCount,
+        dueSoonCount,
+        highPriorityCount,
+        nextDueTask: nextDueTask
+          ? { title: nextDueTask.title, dueDate: nextDueTask.dueDate }
+          : null,
+        attentionScore,
+        tasks: project.tasks.map((t) => ({
+          id: t.id,
+          title: t.title,
+          date: t.dueDate,
+          description: t.description ?? "No description",
+          status: t.status ?? "To Do",
+          priority: t.priority ?? "Normal",
         })),
       };
     });
@@ -80,6 +133,12 @@ const ProjectDashboard = () => {
   const sortedProjects = useMemo<ProjectProps[]>(() => {
     const copy = [...projects];
     switch (sortOption) {
+      case "attention":
+        return copy.sort((a, b) => {
+          if (b.attentionScore !== a.attentionScore)
+            return b.attentionScore - a.attentionScore;
+          return b.id - a.id;
+        });
       case "newest":
         return copy.sort((a, b) => b.id - a.id);
       case "oldest":
@@ -101,7 +160,25 @@ const ProjectDashboard = () => {
     [sortedProjects],
   );
 
-  const hasOnlyCompleted = activeProjects.length === 0 && completedProjects.length > 0;
+  const stats = useMemo(() => {
+    const totalOverdueTasks = activeProjects.reduce(
+      (sum, p) => sum + p.overdueTaskCount,
+      0,
+    );
+    const totalDueSoon = activeProjects.reduce(
+      (sum, p) => sum + p.dueSoonCount,
+      0,
+    );
+    return {
+      activeCount: activeProjects.length,
+      overdueTaskCount: totalOverdueTasks,
+      dueSoonCount: totalDueSoon,
+      completedCount: completedProjects.length,
+    };
+  }, [activeProjects, completedProjects]);
+
+  const hasOnlyCompleted =
+    activeProjects.length === 0 && completedProjects.length > 0;
 
   return (
     <>
@@ -111,21 +188,22 @@ const ProjectDashboard = () => {
           onProjectCreated={() => void loadProjects()}
         />
       )}
-      <div>
-        <h1 className="text-3xl font-bold p-4 sm:p-8">Projects</h1>
-      </div>
-      <div className="px-4 sm:px-8 w-full flex flex-col gap-3 sm:flex-row sm:justify-between sm:items-center">
-        <ProjectSortDropdown value={sortOption} onChange={setSortOption} />
-        <Button
-          variant="secondary"
-          className="flex items-center cursor-pointer px-2 w-full sm:w-auto justify-center sm:justify-start"
-          onClick={() => setShowAddProjectModal(true)}
-        >
-          <Plus width={18} />
-          <p className="font-semibold opacity-95 pb-0.5 text-sm">
-            Add a new project
-          </p>
-        </Button>
+
+      <div className="flex flex-col gap-3 sm:flex-row sm:justify-between sm:items-center p-4 sm:p-8 pb-4">
+        <h1 className="text-3xl font-bold">Projects</h1>
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+          <ProjectSortDropdown value={sortOption} onChange={setSortOption} />
+          <Button
+            variant="secondary"
+            className="flex items-center cursor-pointer px-2 w-full sm:w-auto justify-center sm:justify-start"
+            onClick={() => setShowAddProjectModal(true)}
+          >
+            <Plus width={18} />
+            <p className="font-semibold opacity-95 pb-0.5 text-sm">
+              Add a new project
+            </p>
+          </Button>
+        </div>
       </div>
 
       {isLoading ? (
@@ -136,14 +214,16 @@ const ProjectDashboard = () => {
         <ProjectEmptyState onAddProject={() => setShowAddProjectModal(true)} />
       ) : (
         <>
+          <DashboardStats {...stats} />
+
           {hasOnlyCompleted ? (
-            <div className="px-4 sm:px-8 pt-8 pb-2">
+            <div className="px-4 sm:px-8 pb-2">
               <p className="text-sm text-muted-foreground">
                 All projects are completed.
               </p>
             </div>
           ) : (
-            <div className="p-4 sm:p-8 grid grid-cols-1 gap-4 md:grid-cols-2 w-full max-w-3xl md:max-w-full mx-auto">
+            <div className="px-4 sm:px-8 grid grid-cols-1 gap-4 md:grid-cols-2 w-full max-w-3xl md:max-w-full mx-auto">
               {activeProjects.map((project: ProjectProps) => (
                 <ProjectCard key={project.id} project={project} />
               ))}
@@ -151,7 +231,11 @@ const ProjectDashboard = () => {
           )}
 
           {completedProjects.length > 0 && (
-            <div className={hasOnlyCompleted ? "px-4 sm:px-8" : "px-4 sm:px-8 -mt-2"}>
+            <div
+              className={
+                hasOnlyCompleted ? "px-4 sm:px-8" : "px-4 sm:px-8 mt-2"
+              }
+            >
               <button
                 onClick={() => setShowCompleted((v) => !v)}
                 className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors py-2 cursor-pointer"

@@ -1,13 +1,35 @@
 import { ProjectProps } from "@/types";
 import { Card } from "./ui/card";
 import { Progress } from "./ui/progress";
-import { Badge } from "./ui/badge";
 import { Link } from "@tanstack/react-router";
-import { CheckCircle2 } from "lucide-react";
+import { AlertTriangle, CheckCircle2, ArrowRight } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { urgencyColors } from "@/lib/theme";
 
 interface ProjectCardProps {
   project: ProjectProps;
+}
+
+function daysLeftColorClass(daysLeft: number): string {
+  if (daysLeft <= 3) return urgencyColors.critical;
+  if (daysLeft <= 10) return urgencyColors.warning;
+  return "text-foreground";
+}
+
+function formatNextTaskDate(dateStr: string): { label: string; isOverdue: boolean } {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const due = new Date(dateStr);
+  due.setHours(0, 0, 0, 0);
+  const diffDays = Math.round((due.getTime() - today.getTime()) / 86_400_000);
+
+  if (diffDays < 0) return { label: "overdue", isOverdue: true };
+  if (diffDays === 0) return { label: "today", isOverdue: false };
+  if (diffDays === 1) return { label: "tomorrow", isOverdue: false };
+  return {
+    label: due.toLocaleDateString("en-US", { month: "short", day: "numeric" }),
+    isOverdue: false,
+  };
 }
 
 const ProjectCard = ({ project }: ProjectCardProps) => {
@@ -20,6 +42,10 @@ const ProjectCard = ({ project }: ProjectCardProps) => {
     ? 0
     : Math.round((project.inProgressCount / total) * 100);
 
+  const nextTask = project.nextDueTask;
+  const nextTaskDate =
+    nextTask?.dueDate ? formatNextTaskDate(nextTask.dueDate) : null;
+
   return (
     <Link to="/task/$projectId" params={{ projectId: String(project.id) }}>
       <Card
@@ -28,80 +54,103 @@ const ProjectCard = ({ project }: ProjectCardProps) => {
           isCompleted && "opacity-80",
         )}
       >
-        <div className="w-full min-w-0 flex flex-col justify-between">
+        {/* ── Left section ─────────────────────────────────────── */}
+        <div className="w-full min-w-0 flex flex-col gap-3">
+
+          {/* Title row */}
           <div className="flex items-start justify-between gap-2">
-            <h1 className="font-bold text-xl">{project.title}</h1>
+            <h1 className="font-bold text-xl leading-tight">{project.title}</h1>
             {isCompleted && (
-              <Badge
-                variant="outline"
-                className="shrink-0 border-emerald-500/40 text-emerald-700 dark:border-emerald-400/40 dark:text-emerald-400 px-2 gap-1"
-              >
+              <span className="shrink-0 inline-flex items-center gap-1 rounded-md border border-emerald-500/40 text-emerald-700 dark:border-emerald-400/40 dark:text-emerald-400 px-2 py-0.5 text-xs font-medium">
                 <CheckCircle2 className="h-3 w-3" />
                 Done
-              </Badge>
+              </span>
+            )}
+            {!isCompleted && project.overdueTaskCount > 0 && (
+              <span className="shrink-0 inline-flex items-center gap-1 rounded-md border border-rose-500/40 text-rose-700 dark:border-rose-400/40 dark:text-rose-400 px-2 py-0.5 text-xs font-medium">
+                <AlertTriangle className="h-3 w-3" />
+                {project.overdueTaskCount} overdue
+              </span>
             )}
           </div>
 
-          {!isCompleted && (
-            <div className="text-xs flex flex-wrap gap-2 py-4 sm:py-5">
-              <Badge
-                variant="outline"
-                className="border-emerald-500/40 text-emerald-700 dark:border-emerald-400/40 dark:text-emerald-400 px-2"
-              >
-                <span className="rounded-full w-2 h-2 bg-emerald-500 dark:bg-emerald-400 opacity-60"></span>
-                {project.completedCount} Completed
-              </Badge>
-              <Badge
-                variant="outline"
-                className="border-sky-500/40 text-sky-700 dark:border-sky-400/40 dark:text-sky-400 px-2"
-              >
-                <span className="rounded-full w-2 h-2 bg-sky-500 dark:bg-sky-400 opacity-60"></span>
-                {project.inProgressCount} In Progress
-              </Badge>
-              <Badge
-                variant="outline"
-                className="border-violet-500/40 text-violet-700 dark:border-violet-400/40 dark:text-violet-400 px-2"
-              >
-                <span className="rounded-full w-2 h-2 bg-violet-500 dark:bg-violet-400 opacity-60"></span>
-                {project.todoCount} Not Complete
-              </Badge>
-            </div>
-          )}
-
-          {isCompleted && (
-            <div className="text-xs flex flex-wrap gap-2 py-4 sm:py-5">
-              <Badge
-                variant="outline"
-                className="border-emerald-500/40 text-emerald-700 dark:border-emerald-400/40 dark:text-emerald-400 px-2"
-              >
-                <span className="rounded-full w-2 h-2 bg-emerald-500 dark:bg-emerald-400 opacity-60"></span>
-                {project.tasks.length} task{project.tasks.length !== 1 ? "s" : ""} completed
-              </Badge>
-            </div>
-          )}
-
-          <span className="w-full">
+          {/* Progress bar */}
+          <div className="flex flex-col gap-1.5">
             <Progress
               segments={[
                 { value: completedPct, color: "bg-emerald-500" },
                 { value: inProgressPct, color: "bg-sky-500" },
               ]}
             />
-          </span>
+            <div className="flex items-center justify-between">
+              <span className="text-xs text-muted-foreground tabular-nums">
+                {isCompleted ? (
+                  <span className="text-emerald-600 dark:text-emerald-400">
+                    All {project.tasks.length} task{project.tasks.length !== 1 ? "s" : ""} complete
+                  </span>
+                ) : (
+                  <>
+                    <span className="font-medium text-foreground">{completedPct}%</span>
+                    {" · "}
+                    {project.completedCount} / {project.tasks.length} tasks
+                  </>
+                )}
+              </span>
+              {!isCompleted && project.highPriorityCount > 0 && project.overdueTaskCount === 0 && (
+                <span className="inline-flex items-center gap-1 text-xs text-amber-600 dark:text-amber-400 font-medium">
+                  <span className="h-1.5 w-1.5 rounded-full bg-amber-500 dark:bg-amber-400" />
+                  {project.highPriorityCount} high priority
+                </span>
+              )}
+            </div>
+          </div>
+
+          {/* Next actionable task */}
+          {!isCompleted && nextTask && (
+            <div className="flex items-center gap-1.5 text-xs min-w-0">
+              <ArrowRight className="h-3 w-3 shrink-0 text-muted-foreground/50" />
+              <span className="truncate text-muted-foreground/70 italic">
+                {nextTask.title}
+              </span>
+              {nextTaskDate && (
+                <span
+                  className={cn(
+                    "shrink-0 tabular-nums font-medium",
+                    nextTaskDate.isOverdue
+                      ? "text-rose-500 dark:text-rose-400"
+                      : "text-muted-foreground/60",
+                  )}
+                >
+                  · {nextTaskDate.label}
+                </span>
+              )}
+            </div>
+          )}
         </div>
 
-        <div className="shrink-0 sm:w-[60px] flex flex-row sm:flex-col items-center sm:items-end justify-between sm:justify-start gap-2 border-t sm:border-t-0 pt-3 sm:pt-0 border-border">
+        {/* ── Right section ─────────────────────────────────────── */}
+        <div className="shrink-0 sm:w-[72px] flex flex-row sm:flex-col items-center sm:items-end justify-between sm:justify-start gap-2 border-t sm:border-t-0 pt-3 sm:pt-0 border-border">
           {isCompleted ? (
             <span className="flex flex-col items-center sm:items-end gap-1">
               <CheckCircle2 className="h-7 w-7 text-emerald-500 dark:text-emerald-400" />
-              <p className="text-xs text-emerald-600 dark:text-emerald-400 font-medium">
-                Done
+              <p className="text-xs text-emerald-600 dark:text-emerald-400 font-medium">Done</p>
+            </span>
+          ) : project.isOverdue ? (
+            <span className="flex flex-col items-center gap-1">
+              <AlertTriangle className="h-6 w-6 text-rose-500 dark:text-rose-400" />
+              <p className="text-xs text-rose-600 dark:text-rose-400 font-medium">Overdue</p>
+            </span>
+          ) : project.daysLeft > 0 ? (
+            <span className="flex items-end justify-center gap-1.5">
+              <p className={cn("font-bold text-4xl -mb-1 tabular-nums", daysLeftColorClass(project.daysLeft))}>
+                {project.daysLeft}
               </p>
+              <p className="opacity-65 text-xs pb-0.5">days</p>
             </span>
           ) : (
-            <span className="flex items-end justify-center gap-2">
-              <p className="font-bold text-4xl -mb-1">{project.daysLeft}</p>
-              <p className="opacity-65 text-xs">days left</p>
+            <span className="flex flex-col items-center sm:items-end gap-1 opacity-35">
+              <p className="font-bold text-3xl leading-none">—</p>
+              <p className="text-xs">no deadline</p>
             </span>
           )}
         </div>

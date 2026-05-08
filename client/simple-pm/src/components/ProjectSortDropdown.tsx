@@ -10,9 +10,15 @@ import {
   DropdownMenuTrigger,
 } from "./ui/dropdown-menu";
 
-export type SortOption = "newest" | "oldest" | "alpha-asc" | "alpha-desc";
+export type SortOption =
+  | "attention"
+  | "newest"
+  | "oldest"
+  | "alpha-asc"
+  | "alpha-desc";
 
 export const SORT_LABELS: Record<SortOption, string> = {
+  attention: "Attention",
   newest: "Latest",
   oldest: "Oldest",
   "alpha-asc": "Alphabetical (A–Z)",

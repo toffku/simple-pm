@@ -1,5 +1,6 @@
 import prisma from "../config/prisma.js";
-import type { CreateProjectInput } from "../types/api.types.js";
+import type { CreateProjectInput, UpdateProjectInput } from "../types/api.types.js";
+import { AppError } from "../utils/AppError.js";
 
 const projectListInclude = {
   tasks: true,
@@ -37,6 +38,17 @@ export async function createProject(data: CreateProjectInput) {
       startDate: data.startDate,
       endDate: data.endDate,
     },
+    include: projectListInclude,
+  });
+}
+
+export async function updateProject(id: number, data: UpdateProjectInput) {
+  const existing = await prisma.project.findUnique({ where: { id } });
+  if (!existing) throw new AppError(404, "Project not found.");
+
+  return prisma.project.update({
+    where: { id },
+    data: { status: data.status },
     include: projectListInclude,
   });
 }

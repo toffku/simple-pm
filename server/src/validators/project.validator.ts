@@ -1,4 +1,4 @@
-import type { CreateProjectInput } from "../types/api.types.js";
+import type { CreateProjectInput, UpdateProjectInput } from "../types/api.types.js";
 
 type ValidationResult<T> =
   | { ok: true; data: T }
@@ -39,4 +39,22 @@ export function validateCreateProject(
       endDate: parsedEndDate,
     },
   };
+}
+
+const VALID_STATUSES = new Set(["active", "completed"]);
+
+export function validateUpdateProject(
+  body: unknown,
+): ValidationResult<UpdateProjectInput> {
+  if (typeof body !== "object" || body === null) {
+    return { ok: false, error: "Invalid request body.", status: 400 };
+  }
+
+  const { status } = body as Record<string, unknown>;
+
+  if (typeof status !== "string" || !VALID_STATUSES.has(status)) {
+    return { ok: false, error: "Status must be 'active' or 'completed'.", status: 400 };
+  }
+
+  return { ok: true, data: { status } };
 }

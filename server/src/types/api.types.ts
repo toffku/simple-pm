@@ -20,3 +20,7 @@ export interface UpdateTaskInput {
   priority: string | null;
   dueDate: Date | null;
 }
+
+export interface UpdateProjectInput {
+  status: string;
+}

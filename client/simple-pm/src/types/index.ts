@@ -11,6 +11,7 @@ export type TaskProps = {
 export type ProjectProps = {
   id: number;
   title: string;
+  status: string;
   daysLeft: number;
   completedCount: number;
   inProgressCount: number;
@@ -38,5 +39,6 @@ export type ApiProject = {
   description: string | null;
   startDate: string | null;
   endDate: string | null;
+  status: string;
   tasks: ApiTask[];
 };

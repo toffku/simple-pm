@@ -1,6 +1,6 @@
 import { ProjectProps } from "@/types";
 import ProjectCard from "./ProjectCard";
-import { Plus } from "lucide-react";
+import { Plus, ChevronDown, ChevronUp } from "lucide-react";
 import { Button } from "./ui/button";
 import { fetchJson } from "@/lib/api";
 import { ApiProject } from "@/types";
@@ -17,6 +17,7 @@ const ProjectDashboard = () => {
   const [error, setError] = useState<string | null>(null);
   const [showAddProjectModal, setShowAddProjectModal] = useState(false);
   const [sortOption, setSortOption] = useState<SortOption>("newest");
+  const [showCompleted, setShowCompleted] = useState(false);
 
   const loadProjects = useCallback(async () => {
     try {
@@ -59,6 +60,7 @@ const ProjectDashboard = () => {
       return {
         id: project.id,
         title: project.name,
+        status: project.status ?? "active",
         daysLeft,
         completedCount,
         inProgressCount,
@@ -88,6 +90,18 @@ const ProjectDashboard = () => {
         return copy.sort((a, b) => b.title.localeCompare(a.title));
     }
   }, [projects, sortOption]);
+
+  const activeProjects = useMemo(
+    () => sortedProjects.filter((p) => p.status !== "completed"),
+    [sortedProjects],
+  );
+
+  const completedProjects = useMemo(
+    () => sortedProjects.filter((p) => p.status === "completed"),
+    [sortedProjects],
+  );
+
+  const hasOnlyCompleted = activeProjects.length === 0 && completedProjects.length > 0;
 
   return (
     <>
@@ -121,11 +135,48 @@ const ProjectDashboard = () => {
       ) : sortedProjects.length === 0 ? (
         <ProjectEmptyState onAddProject={() => setShowAddProjectModal(true)} />
       ) : (
-        <div className="p-4 sm:p-8 grid grid-cols-1 gap-4 md:grid-cols-2 w-full max-w-3xl md:max-w-full mx-auto">
-          {sortedProjects.map((project: ProjectProps) => (
-            <ProjectCard key={project.id} project={project} />
-          ))}
-        </div>
+        <>
+          {hasOnlyCompleted ? (
+            <div className="px-4 sm:px-8 pt-8 pb-2">
+              <p className="text-sm text-muted-foreground">
+                All projects are completed.
+              </p>
+            </div>
+          ) : (
+            <div className="p-4 sm:p-8 grid grid-cols-1 gap-4 md:grid-cols-2 w-full max-w-3xl md:max-w-full mx-auto">
+              {activeProjects.map((project: ProjectProps) => (
+                <ProjectCard key={project.id} project={project} />
+              ))}
+            </div>
+          )}
+
+          {completedProjects.length > 0 && (
+            <div className={hasOnlyCompleted ? "px-4 sm:px-8" : "px-4 sm:px-8 -mt-2"}>
+              <button
+                onClick={() => setShowCompleted((v) => !v)}
+                className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors py-2 cursor-pointer"
+              >
+                {showCompleted ? (
+                  <ChevronUp className="h-4 w-4" />
+                ) : (
+                  <ChevronDown className="h-4 w-4" />
+                )}
+                <span>
+                  {showCompleted ? "Hide" : "Show"} completed projects (
+                  {completedProjects.length})
+                </span>
+              </button>
+
+              {showCompleted && (
+                <div className="grid grid-cols-1 gap-4 md:grid-cols-2 w-full max-w-3xl md:max-w-full mx-auto pt-2 pb-8">
+                  {completedProjects.map((project: ProjectProps) => (
+                    <ProjectCard key={project.id} project={project} />
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+        </>
       )}
     </>
   );
